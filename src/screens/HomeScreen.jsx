@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet,Platform,StatusBar, SafeAreaView} from 'react-native';
+import CompteurForm from "./Lubrifiant/CompteurForm";
 
 const HomeScreen = ({ navigation }) => {
     return (
@@ -8,15 +9,9 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => navigation.navigate('Details')}
+                    onPress={() => navigation.navigate('CompteurForm')}
                 >
-                    <Text style={styles.buttonText}>Sale Lubrifiant</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => navigation.navigate('Settings')}
-                >
-                    <Text style={styles.buttonText}>Compteur</Text>
+                    <Text style={styles.buttonText}>Compteur lubrifiant</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

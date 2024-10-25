@@ -1,21 +1,27 @@
-import { StatusBar } from 'expo-status-bar';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from "./src/screens/HomeScreen";
+import CompteurForm from "./src/screens/Lubrifiant/CompteurForm";
 
-export default function App() {
+const Stack = createStackNavigator();
+
+const AppNavigator = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="auto" />
-      <HomeScreen></HomeScreen>
-    </SafeAreaView>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}} />
+        <Stack.Screen name="CompteurForm" component={CompteurForm}  options={{headerShown: false}} />
+        {/* Other screens can be added here */}
+      </Stack.Navigator>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const App = () => {
+  return (
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+  );
+};
+
+export default App;
