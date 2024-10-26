@@ -7,11 +7,9 @@ import axios from "axios";
 
 const CompteurForm = () => {
     const [pompistes, setPompistes] = useState([]);
-    const [pompes, setPompes] = useState([]);
     const [quantite, setQuantite] = useState('');
     const [date, setDate] = useState('');
     const [selectedPompiste, setSelectedPompiste] = useState('');
-    const [selectedPompe, setSelectedPompe] = useState('');
 
     useEffect(() => {
         // Fetch pompistes data
@@ -25,19 +23,8 @@ const CompteurForm = () => {
             }
         };
 
-        // Fetch pompes data
-        const fetchPompes = async () => {
-            try {
-                const response = await axios.get(`${process.env.API_BASE_URL}/client`);
-                setPompes(response.data);
-                console.log(response.data);
-            } catch (error) {
-                console.error(error);
-            }
-        };
 
         fetchPompistes();
-        fetchPompes();
     }, []);
 
     const handleSubmit = () => {
@@ -46,16 +33,15 @@ const CompteurForm = () => {
             compteur: quantite,
             date,
             pompiste: selectedPompiste,
-            pompe: selectedPompe,
         };
-        console.log(formData); // Replace with your submit logic
+        console.log(formData);
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Insertion Compteur Form</Text>
 
-            <Text>Compteur:</Text>
+            <Text>LUBRIFIANT:</Text>
             <TextInput
                 style={styles.input}
                 keyboardType="numeric"
@@ -82,18 +68,6 @@ const CompteurForm = () => {
             >
                 {pompistes.map((pompiste) => (
                     <Picker.Item key={pompiste.id} label={pompiste.nom} value={pompiste.id}/>
-                ))}
-            </Picker>
-
-            <Text>Pompe:</Text>
-            <Picker
-                selectedValue={selectedPompe}
-                style={styles.picker}
-                onValueChange={(itemValue) => setSelectedPompe(itemValue)}
-                required
-            >
-                {pompes.map((pompe) => (
-                    <Picker.Item key={pompe.id} label={pompe.libelle} value={pompe.id}/>
                 ))}
             </Picker>
 

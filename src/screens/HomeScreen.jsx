@@ -1,6 +1,5 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet,Platform,StatusBar, SafeAreaView} from 'react-native';
-import CompteurForm from "./Lubrifiant/CompteurForm";
 
 const HomeScreen = ({ navigation }) => {
     return (
