@@ -19,7 +19,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["INTERNET"]
+      "permissions": [
+        "INTERNET"
+      ]
+    },
+    "extra": {
+      "API_KEY": "http://172.10.188.181:8080/station"
     }
   }
 }

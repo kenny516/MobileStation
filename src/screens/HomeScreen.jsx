@@ -8,7 +8,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => navigation.navigate('CompteurForm')}
+                    onPress={() => navigation.navigate('CompteurLubrifiant')}
                 >
                     <Text style={styles.buttonText}>Compteur lubrifiant</Text>
                 </TouchableOpacity>

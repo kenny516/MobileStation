@@ -1,21 +1,23 @@
-import 'dotenv/config';
-import React, {useEffect, useState} from 'react';
-import {Text, TextInput, Button, StyleSheet, SafeAreaView, Platform, StatusBar} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+import React, { useEffect, useState } from 'react';
+import { Text, TextInput, Button, StyleSheet, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
+import Constants from 'expo-constants';
 
-
-const CompteurForm = () => {
+const CompteurLubrifiant = () => {
     const [pompistes, setPompistes] = useState([]);
     const [quantite, setQuantite] = useState('');
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(new Date());
     const [selectedPompiste, setSelectedPompiste] = useState('');
 
     useEffect(() => {
         // Fetch pompistes data
         const fetchPompistes = async () => {
             try {
-                const response = await axios.get(`${process.env.API_BASE_URL}/client`);
+                const apiKey = Constants.expoConfig.extra.API_KEY;
+                const response = await axios.get(`${apiKey}/client`);
                 setPompistes(response.data);
                 console.log(response.data);
             } catch (error) {
@@ -23,12 +25,10 @@ const CompteurForm = () => {
             }
         };
 
-
         fetchPompistes();
     }, []);
 
     const handleSubmit = () => {
-        // Handle form submission
         const formData = {
             compteur: quantite,
             date,
@@ -51,12 +51,12 @@ const CompteurForm = () => {
             />
 
             <Text>Date:</Text>
-            <TextInput
-                style={styles.input}
-                value={date}
-                onChangeText={setDate}
-                placeholder="YYYY-MM-DDTHH:mm"
-                required
+            <DatePicker
+                selected={date}
+                onChange={(date) => setDate(date)}
+                showTimeSelect
+                dateFormat="Pp"
+                className={styles.input}
             />
 
             <Text>Pompiste:</Text>
@@ -67,17 +67,19 @@ const CompteurForm = () => {
                 required
             >
                 {pompistes.map((pompiste) => (
-                    <Picker.Item key={pompiste.id} label={pompiste.nom} value={pompiste.id}/>
+                    <Picker.Item key={pompiste.id} label={pompiste.nom} value={pompiste.id} />
                 ))}
             </Picker>
 
-            <Button title="Submit" onPress={handleSubmit}/>
+            <Button title="Submit" onPress={handleSubmit} />
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: 20,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
@@ -94,9 +96,9 @@ const styles = StyleSheet.create({
     },
     picker: {
         height: 50,
-        width: '100%',
+        width: '25%',
         marginBottom: 20,
     },
 });
 
-export default CompteurForm;
+export default CompteurLubrifiant;
