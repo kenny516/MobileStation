@@ -1,104 +1,293 @@
 import React, { useEffect, useState } from 'react';
-import { Text, TextInput, Button, StyleSheet, SafeAreaView, Platform, StatusBar } from 'react-native';
+import {
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    SafeAreaView,
+    Platform,
+    StatusBar,
+    Alert,
+    View,
+    ActivityIndicator, Button
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import Constants from 'expo-constants';
+import { MaterialIcons } from '@expo/vector-icons';
 
-const CompteurLubrifiant = () => {
+const CompteurLubrifiant = ({ navigation }) => {
     const [pompistes, setPompistes] = useState([]);
     const [quantite, setQuantite] = useState('');
     const [date, setDate] = useState(new Date());
     const [selectedPompiste, setSelectedPompiste] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const apiKey = Constants.expoConfig.extra.API_KEY;
 
     useEffect(() => {
-        // Fetch pompistes data
         const fetchPompistes = async () => {
+            setIsLoading(true);
             try {
-                const apiKey = Constants.expoConfig.extra.API_KEY;
-                const response = await axios.get(`${apiKey}/client`);
+                const response = await axios.get(`${apiKey}/api/pompistes`);
                 setPompistes(response.data);
-                console.log(response.data);
             } catch (error) {
+                Alert.alert('Error', 'Failed to fetch pompistes data');
                 console.error(error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchPompistes();
     }, []);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        if (!quantite || !selectedPompiste) {
+            Alert.alert('Validation Error', 'Please fill in all required fields');
+            return;
+        }
+
+        setIsSubmitting(true);
         const formData = {
             compteur: quantite,
-            date,
+            date: date.toISOString(), // Ensure date is in ISO format
             pompiste: selectedPompiste,
         };
-        console.log(formData);
+        console.log('Form Data:', formData);
+
+        try {
+            const response = await axios.post(`${apiKey}/api/endpoint`, formData);
+            if (response.status === 200) {
+                Alert.alert(
+                    'Success',
+                    'Data submitted successfully',
+                    [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
+                );
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit data. Please try again.');
+            console.error('Error submitting form:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    if (isLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0066CC" />
+                <Text style={styles.loadingText}>Loading data...</Text>
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Insertion Compteur Form</Text>
+            <View style={styles.card}>
+                <View style={styles.headerContainer}>
+                    <MaterialIcons name="oil-barrel" size={24} color="#0066CC" />
+                    <Text style={styles.title}>Lubricant Counter</Text>
+                </View>
 
-            <Text>LUBRIFIANT:</Text>
-            <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={quantite}
-                onChangeText={setQuantite}
-                required
-            />
+                <View style={styles.formGroup}>
+                    <Text style={styles.label}>LUBRIFIANT</Text>
+                    <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        value={quantite}
+                        onChangeText={setQuantite}
+                        placeholder="Enter quantity"
+                        placeholderTextColor="#666"
+                    />
+                </View>
 
-            <Text>Date:</Text>
-            <DatePicker
-                selected={date}
-                onChange={(date) => setDate(date)}
-                showTimeSelect
-                dateFormat="Pp"
-                className={styles.input}
-            />
+                <View style={[styles.formGroup, styles.datePickerWrapper]}>
+                    <Text style={styles.label}>DATE & TIME</Text>
+                    <DatePicker
+                        selected={date}
+                        onChange={(date) => setDate(date)}
+                        showTimeSelect
+                        dateFormat="Pp" // Show both date and time
+                        popperPlacement="top-start"
+                        popperModifiers={[
+                            {
+                                name: 'preventOverflow',
+                                options: {
+                                    mainAxis: false,
+                                }
+                            }
+                        ]}
+                        customInput={
+                            <TouchableOpacity style={styles.datePickerButton}>
+                                <Text style={styles.datePickerText}>
+                                    {date.toLocaleString()}
+                                </Text>
+                            </TouchableOpacity>
+                        }
+                    />
+                </View>
 
-            <Text>Pompiste:</Text>
-            <Picker
-                selectedValue={selectedPompiste}
-                style={styles.picker}
-                onValueChange={(itemValue) => setSelectedPompiste(itemValue)}
-                required
-            >
-                {pompistes.map((pompiste) => (
-                    <Picker.Item key={pompiste.id} label={pompiste.nom} value={pompiste.id} />
-                ))}
-            </Picker>
+                <View style={styles.formGroup}>
+                    <Text style={styles.label}>POMPISTE</Text>
+                    <View style={styles.pickerContainer}>
+                        <Picker
+                            selectedValue={selectedPompiste}
+                            style={styles.picker}
+                            onValueChange={(itemValue) => setSelectedPompiste(itemValue)}
+                        >
+                            <Picker.Item label="Select a pompiste" value="" />
+                            {pompistes.map((pompiste) => (
+                                <Picker.Item
+                                    key={pompiste.reference}
+                                    label={pompiste.nom}
+                                    value={pompiste.id}
+                                />
+                            ))}
+                        </Picker>
+                    </View>
+                </View>
 
-            <Button title="Submit" onPress={handleSubmit} />
+                <TouchableOpacity
+                    style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+                    onPress={handleSubmit}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? (
+                        <ActivityIndicator color="#FFF" />
+                    ) : (
+                        <Text style={styles.submitButtonText}>Submit</Text>
+                    )}
+                </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.retourButton} onPress={() => navigation.navigate("Home")}>
+                <Text style={styles.retourButtonText}>Retour</Text>
+            </TouchableOpacity>
+
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
+    loadingContainer: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 10,
+        color: '#666',
+    },
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: 15,
         padding: 20,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+        margin: 15,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 25,
     },
     title: {
         fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+        marginLeft: 10,
+    },
+    formGroup: {
         marginBottom: 20,
     },
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+        marginBottom: 8,
+    },
     input: {
-        height: 40,
-        borderColor: 'gray',
+        height: 50,
+        borderColor: '#ddd',
         borderWidth: 1,
-        marginBottom: 20,
-        paddingLeft: 10,
+        borderRadius: 8,
+        paddingHorizontal: 15,
+        fontSize: 16,
+        backgroundColor: '#fff',
+    },
+    datePickerWrapper: {
+        position: 'relative',
+        zIndex: 2, // Higher value than other elements
+    },
+    pickerContainer: {
+        position: 'relative',
+        zIndex: 1,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        backgroundColor: '#fff',
     },
     picker: {
         height: 50,
-        width: '25%',
-        marginBottom: 20,
+        width: '100%',
+    },
+    datePickerButton: {
+        height: 50,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 15,
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+    },
+    datePickerText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    submitButton: {
+        backgroundColor: '#0066CC',
+        paddingVertical: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    submitButtonDisabled: {
+        backgroundColor: '#999',
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    retourButton: {
+        backgroundColor: '#0066CC',
+        paddingVertical: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    retourButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
+
+// Add global styles if necessary
 
 export default CompteurLubrifiant;

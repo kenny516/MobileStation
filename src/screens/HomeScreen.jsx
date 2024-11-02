@@ -12,6 +12,12 @@ const HomeScreen = ({ navigation }) => {
                 >
                     <Text style={styles.buttonText}>Compteur lubrifiant</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('AchatLubrifiant')}
+                >
+                    <Text style={styles.buttonText}>Achat lubrifiant</Text>
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
