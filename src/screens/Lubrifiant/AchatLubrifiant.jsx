@@ -13,8 +13,7 @@ import {
     View,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
 import Constants from 'expo-constants';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -23,7 +22,8 @@ const AchatCarburant = ({ navigation }) => {
     const [fournisseurs, setFournisseurs] = useState([]);
     const [pompes, setPompes] = useState([]);
     const [quantite, setQuantite] = useState('');
-    const [date, setDate] = useState(new Date());
+    const [date, setDate] = useState(new Date())
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedFournisseur, setSelectedFournisseur] = useState('');
     const [selectedPompe, setSelectedPompe] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -84,6 +84,12 @@ const AchatCarburant = ({ navigation }) => {
         }
     };
 
+    const handleDateChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShowDatePicker(Platform.OS === 'ios'); // Keep the picker open only on iOS
+        setDate(currentDate);
+    };
+
     // Loading state
     if (isLoading) {
         return (
@@ -116,18 +122,18 @@ const AchatCarburant = ({ navigation }) => {
                 </View>
 
                 <View style={[styles.formGroup, styles.datePickerWrapper]}>
-                    <Text style={styles.label}>Date</Text>
-                    <DatePicker
-                        selected={date}
-                        onChange={(date) => setDate(date)}
-                        showTimeSelect={false}
-                        dateFormat="yyyy-MM-dd"
-                        customInput={
-                            <TouchableOpacity style={styles.datePickerButton}>
-                                <Text style={styles.datePickerText}>{date.toLocaleDateString()}</Text>
-                            </TouchableOpacity>
-                        }
-                    />
+                    <Text style={styles.label}>DATE & TIME</Text>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePickerButton}>
+                        <Text style={styles.datePickerText}>{date.toLocaleString()}</Text>
+                    </TouchableOpacity>
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display="default"
+                            onChange={handleDateChange}
+                        />
+                    )}
                 </View>
 
                 <View style={styles.formGroup}>
@@ -280,6 +286,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     retourButton: {
+        margin: 15,
         backgroundColor: '#0066CC',
         paddingVertical: 15,
         borderRadius: 8,

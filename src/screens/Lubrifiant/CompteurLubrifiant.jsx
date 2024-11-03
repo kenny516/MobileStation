@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Text,
     TextInput,
@@ -9,19 +9,20 @@ import {
     StatusBar,
     Alert,
     View,
-    ActivityIndicator, Button
+    ActivityIndicator,
+    Button
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
-import axios from "axios";
+import {Picker} from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import axios from 'axios';
 import Constants from 'expo-constants';
-import { MaterialIcons } from '@expo/vector-icons';
+import {MaterialIcons} from '@expo/vector-icons';
 
-const CompteurLubrifiant = ({ navigation }) => {
+const CompteurLubrifiant = ({navigation}) => {
     const [pompistes, setPompistes] = useState([]);
     const [quantite, setQuantite] = useState('');
     const [date, setDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedPompiste, setSelectedPompiste] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +33,7 @@ const CompteurLubrifiant = ({ navigation }) => {
         const fetchPompistes = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(`${apiKey}/api/pompistes`);
+                const response = await axios.get(`${apiKey}api/pompistes`);
                 setPompistes(response.data);
             } catch (error) {
                 Alert.alert('Error', 'Failed to fetch pompistes data');
@@ -65,7 +66,7 @@ const CompteurLubrifiant = ({ navigation }) => {
                 Alert.alert(
                     'Success',
                     'Data submitted successfully',
-                    [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
+                    [{text: 'OK', onPress: () => navigation.navigate('Home')}]
                 );
             }
         } catch (error) {
@@ -76,10 +77,16 @@ const CompteurLubrifiant = ({ navigation }) => {
         }
     };
 
+    const handleDateChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShowDatePicker(Platform.OS === 'ios'); // Keep the picker open only on iOS
+        setDate(currentDate);
+    };
+
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0066CC" />
+                <ActivityIndicator size="large" color="#0066CC"/>
                 <Text style={styles.loadingText}>Loading data...</Text>
             </View>
         );
@@ -89,7 +96,7 @@ const CompteurLubrifiant = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.headerContainer}>
-                    <MaterialIcons name="oil-barrel" size={24} color="#0066CC" />
+                    <MaterialIcons name="oil-barrel" size={24} color="#0066CC"/>
                     <Text style={styles.title}>Lubricant Counter</Text>
                 </View>
 
@@ -107,28 +114,17 @@ const CompteurLubrifiant = ({ navigation }) => {
 
                 <View style={[styles.formGroup, styles.datePickerWrapper]}>
                     <Text style={styles.label}>DATE & TIME</Text>
-                    <DatePicker
-                        selected={date}
-                        onChange={(date) => setDate(date)}
-                        showTimeSelect
-                        dateFormat="Pp" // Show both date and time
-                        popperPlacement="top-start"
-                        popperModifiers={[
-                            {
-                                name: 'preventOverflow',
-                                options: {
-                                    mainAxis: false,
-                                }
-                            }
-                        ]}
-                        customInput={
-                            <TouchableOpacity style={styles.datePickerButton}>
-                                <Text style={styles.datePickerText}>
-                                    {date.toLocaleString()}
-                                </Text>
-                            </TouchableOpacity>
-                        }
-                    />
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePickerButton}>
+                        <Text style={styles.datePickerText}>{date.toLocaleString()}</Text>
+                    </TouchableOpacity>
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display="default"
+                            onChange={handleDateChange}
+                        />
+                    )}
                 </View>
 
                 <View style={styles.formGroup}>
@@ -139,12 +135,12 @@ const CompteurLubrifiant = ({ navigation }) => {
                             style={styles.picker}
                             onValueChange={(itemValue) => setSelectedPompiste(itemValue)}
                         >
-                            <Picker.Item label="Select a pompiste" value="" />
+                            <Picker.Item label="Select a pompiste" value=""/>
                             {pompistes.map((pompiste) => (
                                 <Picker.Item
                                     key={pompiste.reference}
                                     label={pompiste.nom}
-                                    value={pompiste.id}
+                                    value={pompiste.reference}
                                 />
                             ))}
                         </Picker>
@@ -157,7 +153,7 @@ const CompteurLubrifiant = ({ navigation }) => {
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? (
-                        <ActivityIndicator color="#FFF" />
+                        <ActivityIndicator color="#FFF"/>
                     ) : (
                         <Text style={styles.submitButtonText}>Submit</Text>
                     )}
@@ -167,7 +163,6 @@ const CompteurLubrifiant = ({ navigation }) => {
             <TouchableOpacity style={styles.retourButton} onPress={() => navigation.navigate("Home")}>
                 <Text style={styles.retourButtonText}>Retour</Text>
             </TouchableOpacity>
-
         </SafeAreaView>
     );
 };
@@ -275,6 +270,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     retourButton: {
+        margin: 15,
         backgroundColor: '#0066CC',
         paddingVertical: 15,
         borderRadius: 8,
@@ -287,7 +283,5 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 });
-
-// Add global styles if necessary
 
 export default CompteurLubrifiant;
