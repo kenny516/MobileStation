@@ -20,7 +20,7 @@ import {MaterialIcons} from '@expo/vector-icons';
 
 const CompteurLubrifiant = ({navigation}) => {
     const [pompistes, setPompistes] = useState([]);
-    const [pompe, setPompe] = useState([]);
+    const [pompes, setPompes] = useState([]);
     const [quantite, setQuantite] = useState('');
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -39,7 +39,7 @@ const CompteurLubrifiant = ({navigation}) => {
                 setPompistes(pompisteResponse.data);
 
                 const pompeResponse = await axios.get(`${apiKey}api/pompes`);
-                setPompe(pompeResponse.data);
+                setPompes(pompeResponse.data);
             } catch (error) {
                 Alert.alert('Error', 'Failed to fetch pompistes data');
                 console.error(error);
