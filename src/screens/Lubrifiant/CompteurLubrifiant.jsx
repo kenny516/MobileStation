@@ -20,21 +20,26 @@ import {MaterialIcons} from '@expo/vector-icons';
 
 const CompteurLubrifiant = ({navigation}) => {
     const [pompistes, setPompistes] = useState([]);
+    const [pompe, setPompe] = useState([]);
     const [quantite, setQuantite] = useState('');
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedPompiste, setSelectedPompiste] = useState('');
+    const [selectedPompe, setSelectedPompe] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const apiKey = Constants.expoConfig.extra.API_KEY;
 
     useEffect(() => {
-        const fetchPompistes = async () => {
+        const fetchData = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(`${apiKey}api/pompistes`);
-                setPompistes(response.data);
+                const pompisteResponse = await axios.get(`${apiKey}api/pompistes`);
+                setPompistes(pompisteResponse.data);
+
+                const pompeResponse = await axios.get(`${apiKey}api/pompes`);
+                setPompe(pompeResponse.data);
             } catch (error) {
                 Alert.alert('Error', 'Failed to fetch pompistes data');
                 console.error(error);
@@ -43,7 +48,7 @@ const CompteurLubrifiant = ({navigation}) => {
             }
         };
 
-        fetchPompistes();
+        fetchData();
     }, []);
 
     const handleSubmit = async () => {
@@ -54,9 +59,10 @@ const CompteurLubrifiant = ({navigation}) => {
 
         setIsSubmitting(true);
         const formData = {
-            compteur: quantite,
-            date: date.toISOString(), // Ensure date is in ISO format
-            pompiste: selectedPompiste,
+            valeur: quantite,
+            dateHeure: date.toISOString(), // Ensure date is in ISO format
+            Idpompiste: selectedPompiste,
+            pompe: selectedPompe,
         };
         console.log('Form Data:', formData);
 
@@ -145,6 +151,19 @@ const CompteurLubrifiant = ({navigation}) => {
                             ))}
                         </Picker>
                     </View>
+                </View>
+                <View style={styles.formGroup}>
+                    <Text style={styles.label}>Pompe</Text>
+                    <Picker
+                        selectedValue={selectedPompe}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setSelectedPompe(itemValue)}
+                    >
+                        <Picker.Item label="Select pompe" value="" />
+                        {pompes.map((pompe) => (
+                            <Picker.Item key={pompe.id} label={pompe.val} value={pompe.id} />
+                        ))}
+                    </Picker>
                 </View>
 
                 <TouchableOpacity

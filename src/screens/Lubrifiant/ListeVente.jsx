@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 
 const SalesTable = () => {
     const [selectedId, setSelectedId] = useState(null);
-    const [salesData, setSalesData] = useState([]);
+    //const [salesData, setSalesData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const apiKey = Constants.expoConfig.extra.API_KEY;
@@ -35,7 +35,6 @@ const SalesTable = () => {
             </View>
         );
     }
-    // Static sales data
     // const salesData = [
     //     {
     //         id: '1',
