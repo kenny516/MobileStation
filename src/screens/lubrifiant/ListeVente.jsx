@@ -1,95 +1,105 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, FlatList, StyleSheet, TouchableOpacity, Animated, Alert, ActivityIndicator} from 'react-native';
+import {
+    View,
+    Text,
+    FlatList,
+    StyleSheet,
+    TouchableOpacity,
+    Animated,
+    Alert,
+    ActivityIndicator,
+    Platform, StatusBar, SafeAreaView
+} from 'react-native';
 import { Card } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
-const SalesTable = () => {
+const SalesTable = ({navigation}) => {
     const [selectedId, setSelectedId] = useState(null);
     //const [salesData, setSalesData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const apiKey = Constants.expoConfig.extra.API_KEY;
 
-    useEffect(() => {
-        const fetchSalesData = async () => {
-            try {
-                const response = await axios.get(`${apiKey}/api/ventes`);
-                setSalesData(response.data);
-            } catch (error) {
-                Alert.alert('Error', 'Failed to fetch sales data');
-                console.error(error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchSalesData();
-    }, []);
-
-    if (isLoading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0066CC" />
-                <Text style={styles.loadingText}>Loading sales data...</Text>
-            </View>
-        );
-    }
-    // const salesData = [
-    //     {
-    //         id: '1',
-    //         designation: 'Sale 1',
-    //         magasin: 'Store A',
-    //         date: '2024-11-01T10:00:00Z',
-    //         remarque: 'First sale',
-    //         idClient: 'C001',
-    //         nomClient: 'John Doe',
-    //         montantTotal: 150.00,
-    //         montantPaye: 100.00,
-    //         resteAPayer: 50.00,
-    //         avoir: 0.00,
-    //     },
-    //     {
-    //         id: '2',
-    //         designation: 'Sale 1',
-    //         magasin: 'Store A',
-    //         date: '2024-11-01T10:00:00Z',
-    //         remarque: 'First sale',
-    //         idClient: 'C001',
-    //         nomClient: 'John Doe',
-    //         montantTotal: 150.00,
-    //         montantPaye: 100.00,
-    //         resteAPayer: 50.00,
-    //         avoir: 0.00,
-    //     },
-    //     {
-    //         id: '3',
-    //         designation: 'Sale 1',
-    //         magasin: 'Store A',
-    //         date: '2024-11-01T10:00:00Z',
-    //         remarque: 'First sale',
-    //         idClient: 'C001',
-    //         nomClient: 'John Doe',
-    //         montantTotal: 150.00,
-    //         montantPaye: 100.00,
-    //         resteAPayer: 0.00,
-    //         avoir: 0.00,
-    //     },
-    //     {
-    //         id: '4',
-    //         designation: 'Sale 1',
-    //         magasin: 'Store A',
-    //         date: '2024-11-01T10:00:00Z',
-    //         remarque: 'First sale',
-    //         idClient: 'C001',
-    //         nomClient: 'John Doe',
-    //         montantTotal: 150.00,
-    //         montantPaye: 100.00,
-    //         resteAPayer: 0.00,
-    //         avoir: 0.00,
-    //     },
-    //     // ... other sales data
-    // ];
+    // useEffect(() => {
+    //     const fetchSalesData = async () => {
+    //         try {
+    //             const response = await axios.get(`${apiKey}/api/ventes`);
+    //             setSalesData(response.data);
+    //         } catch (error) {
+    //             Alert.alert('Error', 'Failed to fetch sales data');
+    //             console.error(error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     };
+    //
+    //     fetchSalesData();
+    // }, []);
+    //
+    // if (isLoading) {
+    //     return (
+    //         <View style={styles.loadingContainer}>
+    //             <ActivityIndicator size="large" color="#0066CC" />
+    //             <Text style={styles.loadingText}>Loading sales data...</Text>
+    //         </View>
+    //     );
+    // }
+    const salesData = [
+        {
+            id: '1',
+            designation: 'Sale 1',
+            magasin: 'Store A',
+            date: '2024-11-01T10:00:00Z',
+            remarque: 'First sale',
+            idClient: 'C001',
+            nomClient: 'John Doe',
+            montantTotal: 150.00,
+            montantPaye: 100.00,
+            resteAPayer: 50.00,
+            avoir: 0.00,
+        },
+        {
+            id: '2',
+            designation: 'Sale 1',
+            magasin: 'Store A',
+            date: '2024-11-01T10:00:00Z',
+            remarque: 'First sale',
+            idClient: 'C001',
+            nomClient: 'John Doe',
+            montantTotal: 150.00,
+            montantPaye: 100.00,
+            resteAPayer: 50.00,
+            avoir: 0.00,
+        },
+        {
+            id: '3',
+            designation: 'Sale 1',
+            magasin: 'Store A',
+            date: '2024-11-01T10:00:00Z',
+            remarque: 'First sale',
+            idClient: 'C001',
+            nomClient: 'John Doe',
+            montantTotal: 150.00,
+            montantPaye: 100.00,
+            resteAPayer: 0.00,
+            avoir: 0.00,
+        },
+        {
+            id: '4',
+            designation: 'Sale 1',
+            magasin: 'Store A',
+            date: '2024-11-01T10:00:00Z',
+            remarque: 'First sale',
+            idClient: 'C001',
+            nomClient: 'John Doe',
+            montantTotal: 150.00,
+            montantPaye: 100.00,
+            resteAPayer: 0.00,
+            avoir: 0.00,
+        },
+        // ... other sales data
+    ];
 
     const renderSaleCard = ({ item }) => {
         const isSelected = item.id === selectedId;
@@ -169,7 +179,7 @@ const SalesTable = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Sales Overview</Text>
             <FlatList
                 data={salesData}
@@ -178,15 +188,29 @@ const SalesTable = () => {
                 contentContainerStyle={styles.listContainer}
                 showsVerticalScrollIndicator={false}
             />
-        </View>
+            <TouchableOpacity style={styles.retourButton} onPress={() => navigation.navigate("Home")}>
+                <Text style={styles.retourButtonText}>Retour</Text>
+            </TouchableOpacity>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 10,
+        color: '#666',
+    },
     container: {
+        marginLeft:10,
+        marginRight:10,
         flex: 1,
         backgroundColor: '#f5f5f5',
-        padding: 16,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     title: {
         fontSize: 24,
@@ -290,6 +314,19 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
         marginTop: 4,
+    },
+    retourButton: {
+        margin: 15,
+        backgroundColor: '#2E8B57',
+        paddingVertical: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    retourButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet,Platform,StatusBar, SafeAreaView} from 'react-native';
-import SalesTable from "./Lubrifiant/ListeVente";
+import SalesTable from "./lubrifiant/ListeVente";
 
 const HomeScreen = ({ navigation }) => {
     return (
@@ -25,7 +25,18 @@ const HomeScreen = ({ navigation }) => {
                 >
                     <Text style={styles.buttonText}>Vente liste</Text>
                 </TouchableOpacity>
-
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('EtatStock')}
+                >
+                    <Text style={styles.buttonText}>Stock liste</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('CompteurCarbu')}
+                >
+                    <Text style={styles.buttonText}>Compteur</Text>
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );

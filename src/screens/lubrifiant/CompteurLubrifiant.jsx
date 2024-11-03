@@ -1,80 +1,79 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Text,
     TextInput,
-    Button,
+    TouchableOpacity,
     StyleSheet,
     SafeAreaView,
     Platform,
     StatusBar,
     Alert,
-    TouchableOpacity,
-    ActivityIndicator,
     View,
+    ActivityIndicator,
+    Button
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from "axios";
+import axios from 'axios';
 import Constants from 'expo-constants';
-import { MaterialIcons } from '@expo/vector-icons';
+import {MaterialIcons} from '@expo/vector-icons';
 
-const AchatCarburant = ({ navigation }) => {
-    const [fournisseurs, setFournisseurs] = useState([]);
+const CompteurLubrifiant = ({navigation}) => {
+    const [pompistes, setPompistes] = useState([]);
     const [pompes, setPompes] = useState([]);
     const [quantite, setQuantite] = useState('');
-    const [date, setDate] = useState(new Date())
+    const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [selectedFournisseur, setSelectedFournisseur] = useState('');
+    const [selectedPompiste, setSelectedPompiste] = useState('');
     const [selectedPompe, setSelectedPompe] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const apiKey = Constants.expoConfig.extra.API_KEY;
 
-    // Fetch fournisseurs and pompes when the component mounts
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                // Fetch fournisseurs
-                const fournisseursResponse = await axios.get(`${apiKey}/fournissuers`);
-                setFournisseurs(fournisseursResponse.data);
+                const pompisteResponse = await axios.get(`${apiKey}api/pompistes`);
+                setPompistes(pompisteResponse.data);
 
-                // Fetch pompes
-                const pompesResponse = await axios.get(`${apiKey}api/pompes`);
-                setPompes(pompesResponse.data);
+                const pompeResponse = await axios.get(`${apiKey}api/pompes`);
+                setPompes(pompeResponse.data);
             } catch (error) {
-                console.error('Error fetching data:', error);
-                Alert.alert('Error', 'Failed to load data. Please try again later.');
+                Alert.alert('Error', 'Failed to fetch pompistes data');
+                console.error(error);
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchData();
-    }, []); // Empty dependency array to run once on mount
+    }, []);
 
-    // Handle form submission
     const handleSubmit = async () => {
-        if (!quantite || !selectedFournisseur || !selectedPompe) {
+        if (!quantite || !selectedPompiste) {
             Alert.alert('Validation Error', 'Please fill in all required fields');
             return;
         }
 
         setIsSubmitting(true);
         const formData = {
-            quantite,
-            date: date.toISOString(),
-            refFournisseur: selectedFournisseur,
+            valeur: quantite,
+            dateHeure: date.toISOString(), // Ensure date is in ISO format
+            Idpompiste: selectedPompiste,
             pompe: selectedPompe,
         };
         console.log('Form Data:', formData);
 
         try {
-            const response = await axios.post(`${apiKey}/achat`, formData);
+            const response = await axios.post(`${apiKey}/api/endpoint`, formData);
             if (response.status === 200) {
-                Alert.alert('Success', 'Data submitted successfully');
-                navigation.navigate('Home');
+                Alert.alert(
+                    'Success',
+                    'Data submitted successfully',
+                    [{text: 'OK', onPress: () => navigation.navigate('Home')}]
+                );
             }
         } catch (error) {
             Alert.alert('Error', 'Failed to submit data. Please try again.');
@@ -90,27 +89,25 @@ const AchatCarburant = ({ navigation }) => {
         setDate(currentDate);
     };
 
-    // Loading state
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0066CC" />
+                <ActivityIndicator size="large" color="#0066CC"/>
                 <Text style={styles.loadingText}>Loading data...</Text>
             </View>
         );
     }
 
-    // Render the component
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.headerContainer}>
-                    <MaterialIcons name="local-gas-station" size={24} color="#0066CC" />
-                    <Text style={styles.title}>Achat Carburant</Text>
+                    <MaterialIcons name="oil-barrel" size={24} color="#0066CC"/>
+                    <Text style={styles.title}>Lubricant Counter</Text>
                 </View>
 
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Quantité</Text>
+                    <Text style={styles.label}>LUBRIFIANT</Text>
                     <TextInput
                         style={styles.input}
                         keyboardType="numeric"
@@ -137,19 +134,24 @@ const AchatCarburant = ({ navigation }) => {
                 </View>
 
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Fournisseur</Text>
-                    <Picker
-                        selectedValue={selectedFournisseur}
-                        style={styles.picker}
-                        onValueChange={(itemValue) => setSelectedFournisseur(itemValue)}
-                    >
-                        <Picker.Item label="Select fournisseur" value="" />
-                        {fournisseurs.map((fournisseur) => (
-                            <Picker.Item key={fournisseur.id} label={fournisseur.nom} value={fournisseur.id} />
-                        ))}
-                    </Picker>
+                    <Text style={styles.label}>POMPISTE</Text>
+                    <View style={styles.pickerContainer}>
+                        <Picker
+                            selectedValue={selectedPompiste}
+                            style={styles.picker}
+                            onValueChange={(itemValue) => setSelectedPompiste(itemValue)}
+                        >
+                            <Picker.Item label="Select a pompiste" value=""/>
+                            {pompistes.map((pompiste) => (
+                                <Picker.Item
+                                    key={pompiste.reference}
+                                    label={pompiste.nom}
+                                    value={pompiste.reference}
+                                />
+                            ))}
+                        </Picker>
+                    </View>
                 </View>
-
                 <View style={styles.formGroup}>
                     <Text style={styles.label}>Pompe</Text>
                     <Picker
@@ -170,7 +172,7 @@ const AchatCarburant = ({ navigation }) => {
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? (
-                        <ActivityIndicator color="#FFF" />
+                        <ActivityIndicator color="#FFF"/>
                     ) : (
                         <Text style={styles.submitButtonText}>Submit</Text>
                     )}
@@ -180,14 +182,11 @@ const AchatCarburant = ({ navigation }) => {
             <TouchableOpacity style={styles.retourButton} onPress={() => navigation.navigate("Home")}>
                 <Text style={styles.retourButtonText}>Retour</Text>
             </TouchableOpacity>
-
-
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    // Your styles remain unchanged
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
@@ -247,15 +246,19 @@ const styles = StyleSheet.create({
     },
     datePickerWrapper: {
         position: 'relative',
-        zIndex: 2,
+        zIndex: 2, // Higher value than other elements
+    },
+    pickerContainer: {
+        position: 'relative',
+        zIndex: 1,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        backgroundColor: '#fff',
     },
     picker: {
         height: 50,
         width: '100%',
-        borderColor: '#ddd',
-        borderWidth: 1,
-        borderRadius: 8,
-        backgroundColor: '#fff',
     },
     datePickerButton: {
         height: 50,
@@ -287,7 +290,7 @@ const styles = StyleSheet.create({
     },
     retourButton: {
         margin: 15,
-        backgroundColor: '#0066CC',
+        backgroundColor: '#2E8B57',
         paddingVertical: 15,
         borderRadius: 8,
         alignItems: 'center',
@@ -300,4 +303,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AchatCarburant;
+export default CompteurLubrifiant;
